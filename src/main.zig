@@ -3,7 +3,7 @@ const jsonp = @import("jsonp.zig");
 
 const walloc = std.heap.wasm_allocator;
 
-export fn parseit() [*]u8 {
+export fn parseJson() [*]u8 {
     const json =
         \\ {
         \\   "firstName": "John",
@@ -28,6 +28,6 @@ fn c_strlen(ptr: [*]const u8) usize {
     return i;
 }
 
-export fn lenit(a: [*]u8) usize {
+export fn ptrLen(a: [*]u8) usize {
     return c_strlen(a);
 }

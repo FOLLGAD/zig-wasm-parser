@@ -1,13 +1,11 @@
 const fs = require("node:fs");
-
 const wasmBuffer = fs.readFileSync("./zig-out/bin/langtest.wasm");
 
 WebAssembly.instantiate(wasmBuffer, {}).then((wasmModule) => {
-  // Exported function live under instance.exports
-  const { parseit, lenit, memory } = wasmModule.instance.exports;
+  const { parseJson, ptrLen, memory } = wasmModule.instance.exports;
 
-  const pointer = parseit();
-  const len = lenit(pointer);
+  const pointer = parseJson();
+  const len = ptrLen(pointer);
 
   let str = new TextDecoder().decode(
     new Uint8Array(memory.buffer, pointer, len),
