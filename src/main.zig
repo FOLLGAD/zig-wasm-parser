@@ -1,7 +1,7 @@
 const std = @import("std");
 const jsonp = @import("jsonp.zig");
 
-var memory = std.mem.zeroes([1024:0]u8);
+const walloc = std.heap.wasm_allocator;
 
 export fn parseit() [*]u8 {
     const json =
@@ -15,9 +15,11 @@ export fn parseit() [*]u8 {
     ;
 
     const out = jsonp.parseJson(json);
-    //now, format to string and copy to allocator
-    _ = std.fmt.bufPrint(&memory, "{?}", .{out}) catch unreachable;
-    return @ptrCast(&memory);
+
+    var memory = std.ArrayList(u8).init(walloc);
+    memory.writer().print("{?}", .{out}) catch unreachable;
+
+    return memory.items.ptr;
 }
 
 fn c_strlen(ptr: [*]const u8) usize {
