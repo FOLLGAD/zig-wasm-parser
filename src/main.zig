@@ -3,22 +3,21 @@ const jsonp = @import("jsonp.zig");
 
 const walloc = std.heap.wasm_allocator;
 
-export fn parseJson() [*]u8 {
-    const json =
-        \\ {
-        \\   "firstName": "John",
-        \\   "num": [1,23,456],
-        \\   "arr":[{
-        \\     "a": 1,
-        \\     "b": 2,
-        \\     "c": 3
-    ;
-
-    const out = jsonp.parseJson(json);
+export fn parseJson(offset: usize, len: usize) [*]u8 {
+    const ptr: [*]const u8 = @ptrFromInt(offset);
+    const array: []const u8 = ptr[0..len];
 
     var memory = std.ArrayList(u8).init(walloc);
+
+    const out = jsonp.parseJson(array) catch {
+        const errorString: []const u8 = "Error";
+        _ = memory.writer().write(errorString) catch unreachable;
+        return memory.items.ptr;
+    };
+
     memory.writer().print("{?}", .{out}) catch unreachable;
 
+    // TODO: set len as the first item in the array
     return memory.items.ptr;
 }
 

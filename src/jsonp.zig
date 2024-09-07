@@ -214,6 +214,7 @@ fn parseValue() mecha.Parser(Value) {
         ws,
     });
 }
+
 const ObjectRepr = struct { key: []const u8, value: Value };
 
 fn parseObject() mecha.Parser(Value) {
@@ -229,9 +230,11 @@ fn parseObject() mecha.Parser(Value) {
         ws,
         parseString(),
         ws,
-        colon.discard(),
-        ws,
-        mecha.ref(parseValue),
+        mecha.combine(.{
+            colon.discard(),
+            ws,
+            mecha.ref(parseValue),
+        }).opt(),
         ws,
     }).map(struct {
         fn map(tuple: std.meta.Tuple(&.{ Value, Value })) ObjectRepr {
@@ -270,11 +273,11 @@ fn parseObject() mecha.Parser(Value) {
     }.map);
 }
 
-pub fn parseJson(json: []const u8) Value {
+pub fn parseJson(json: []const u8) !Value {
     defer arena.deinit();
 
     const parser = parseValue();
-    const result = parser.parse(allocator, json) catch unreachable;
+    const result = try parser.parse(allocator, json);
 
     return result.value;
 }
