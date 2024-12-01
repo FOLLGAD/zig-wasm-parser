@@ -11,7 +11,7 @@ const Value = union(enum) {
     Number: f64,
     String: []const u8,
     Array: []Value,
-    Object: std.StringHashMap(Value),
+    Object: std.StringHashMap(?Value),
 
     pub fn format(
         self: Value,
@@ -39,7 +39,7 @@ const Value = union(enum) {
                 while (it.next()) |entry| {
                     if (index > 0) try writer.writeAll(", ");
                     try writer.print("\"{s}\": ", .{entry.key_ptr.*});
-                    try entry.value_ptr.*.format(fmt, options, writer);
+                    try entry.value_ptr.*.?.format(fmt, options, writer);
                     index += 1;
                 }
                 try writer.writeAll("}");
@@ -47,9 +47,13 @@ const Value = union(enum) {
         }
     }
 };
-
 fn parseNull() mecha.Parser(Value) {
-    return mecha.string("null").map(struct {
+    return mecha.oneOf(.{
+        mecha.combine(.{mecha.string("null")}),
+        mecha.combine(.{ mecha.string("n"), ws, mecha.eos }),
+        mecha.combine(.{ mecha.string("nu"), ws, mecha.eos }),
+        mecha.combine(.{ mecha.string("nul"), ws, mecha.eos }),
+    }).map(struct {
         fn map(_: []const u8) Value {
             return .Null;
         }
@@ -58,12 +62,25 @@ fn parseNull() mecha.Parser(Value) {
 
 fn parseBool() mecha.Parser(Value) {
     return mecha.oneOf(.{
-        mecha.string("true").map(struct {
+        mecha.oneOf(.{
+            mecha.combine(.{ mecha.string("t"), ws, mecha.eos }),
+            mecha.combine(.{ mecha.string("tr"), ws, mecha.eos }),
+            mecha.combine(.{ mecha.string("tru"), ws, mecha.eos }),
+            mecha.string("true"),
+        })
+            .map(struct {
             fn map(_: []const u8) Value {
                 return .{ .Bool = true };
             }
         }.map),
-        mecha.string("false").map(struct {
+
+        mecha.oneOf(.{
+            mecha.combine(.{ mecha.string("f"), ws, mecha.eos }),
+            mecha.combine(.{ mecha.string("fa"), ws, mecha.eos }),
+            mecha.combine(.{ mecha.string("fal"), ws, mecha.eos }),
+            mecha.combine(.{ mecha.string("fals"), ws, mecha.eos }),
+            mecha.string("false"),
+        }).map(struct {
             fn map(_: []const u8) Value {
                 return .{ .Bool = false };
             }
@@ -215,7 +232,7 @@ fn parseValue() mecha.Parser(Value) {
     });
 }
 
-const ObjectRepr = struct { key: []const u8, value: Value };
+const ObjectRepr = struct { key: []const u8, value: ?Value };
 
 fn parseObject() mecha.Parser(Value) {
     const openBrace = mecha.ascii.char('{');
@@ -233,12 +250,12 @@ fn parseObject() mecha.Parser(Value) {
         mecha.combine(.{
             colon.discard(),
             ws,
-            mecha.ref(parseValue),
+            mecha.ref(parseValue).opt(),
         }).opt(),
         ws,
     }).map(struct {
-        fn map(tuple: std.meta.Tuple(&.{ Value, Value })) ObjectRepr {
-            return .{ .key = tuple[0].String, .value = tuple[1] };
+        fn map(tuple: std.meta.Tuple(&.{ Value, ??Value })) ObjectRepr {
+            return .{ .key = tuple[0].String, .value = tuple[1] orelse null };
         }
     }.map);
 
@@ -251,7 +268,7 @@ fn parseObject() mecha.Parser(Value) {
         comma.opt().discard(),
     }).map(struct {
         fn map(tuple: std.meta.Tuple(&.{ ObjectRepr, []ObjectRepr })) Value {
-            var map2 = std.StringHashMap(Value).init(allocator);
+            var map2 = std.StringHashMap(?Value).init(allocator);
             map2.put(tuple[0].key, tuple[0].value) catch unreachable;
             for (tuple[1]) |item| {
                 map2.put(item.key, item.value) catch unreachable;
@@ -268,7 +285,8 @@ fn parseObject() mecha.Parser(Value) {
         closeBrace,
     }).map(struct {
         fn map(value: ?Value) Value {
-            return value orelse .{ .Object = std.StringHashMap(Value).init(allocator) };
+            if (value) |v| return v;
+            return .{ .Object = std.StringHashMap(?Value).init(allocator) };
         }
     }.map);
 }
