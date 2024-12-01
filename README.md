@@ -42,7 +42,7 @@ For the above input, Partial-JSON would return:
 
 The parser is implemented in Zig, and compiled to WebAssembly.
 
-It is able to parse and correct a JSON document in 1.3ms.
+It is able to parse and correct a 50kb JSON document in 1.3ms.
 
 ## Building
 
