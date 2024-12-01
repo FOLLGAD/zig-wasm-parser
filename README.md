@@ -4,8 +4,8 @@ A high-performance "partial" JSON parser.
 
 ## Why?
 
-LLMs are often used to extract data from unstructured text.
-While this JSON is streaming, it might look like this:
+LLM streaming is hard. Parsers are often used to extract data from unstructured text.
+One of the most common data formats is JSON, and while it's streaming, it might look like this:
 
 ```json
 {
