@@ -7,8 +7,8 @@
 	</head>
 	<body>
 		<div style="display: flex; flex-direction: column; align-items: center; padding: 20px">
-			<h1>⚡️ Partial JSON Parser</h1>
-            <button id="wttr" style="padding: 8px 16px">Paste Weather Data</button>
+			<h1>Partial JSON Parser</h1>
+			<button id="wttr" style="padding: 8px 16px">Paste Weather Data</button>
 			<textarea
 				id="jsonInput"
 				rows="10"
@@ -16,14 +16,15 @@
 				style="margin: 20px; padding: 10px; font-family: monospace"
 				placeholder="Enter your JSON here..."
 			></textarea>
-            <div style="color: #666; text-align: center;">
-                <p style="width:100%">Try things like:</p>
-                <pre style="margin: 0; padding: 0; font-family: monospace; width: 100%">
+			<div style="color: #666; text-align: center">
+				<p style="width: 100%">Try things like:</p>
+				<pre style="margin: 0; padding: 0; font-family: monospace; width: 100%">
 t -> true
 fa -> false
 [1, 2, 3 -> [1, 2, 3]
-                </pre>
-            </div>
+                </pre
+				>
+			</div>
 			<div style="display: flex; gap: 10px; margin-bottom: 20px">
 				<button style="padding: 8px 16px">Parse</button>
 			</div>
@@ -34,6 +35,10 @@ fa -> false
 				</div>
 			</div>
 		</div>
+
+		<p>
+			<a href="https://github.com/FOLLGAD/zig-wasm">Github</a>
+		</p>
 		<script type="module" src="/script.js"></script>
 	</body>
 </html>
