@@ -44,6 +44,12 @@ The parser is implemented in Zig, and compiled to WebAssembly.
 
 It is able to parse, correct and return a 50KB document in under **6ms** (most of the time is spent on JS-WASM data transfer).
 
+## Building
+
+```bash
+$ zig build zig build -Dtarget=wasm32-wasi
+```
+
 ## Demo
 
 Check [the demo](https://wasm-test.ahlback-emil.workers.dev) for a live demo.
