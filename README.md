@@ -1,10 +1,10 @@
-# Partial-JSON: High-Performance JSON Correction for WebAssembly ⚡️
+# Partial-JSON parser
 
-A high-performance "partial" JSON parser.
+A "partial" JSON parser for WASM.
 
 ## Why?
 
-LLM streaming is hard. Parsers are often used to extract data from unstructured text.
+LLM stream parsing is hard. Parsers are often used to extract data from unstructured text.
 One of the most common data formats is JSON, and while it's streaming, it might look like this:
 
 ```json
