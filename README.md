@@ -1,4 +1,4 @@
-# Partial-JSON wasm
+# Partial-JSON parser
 
 A "partial" JSON parser for WASM.
 
