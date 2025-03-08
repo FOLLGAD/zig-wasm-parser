@@ -37,20 +37,21 @@ WebAssembly.instantiateStreaming(fetch('/partial-json.wasm'), {
 		const buffer = new Uint8Array(memory.buffer);
 		const offset = 0;
 
-        const startTime = performance.now();
 		// put the input string into the wasm memory
 		const uint8arr = new TextEncoder().encode(input);
         buffer.fill(0, 0, offset+1)
 		buffer.set(uint8arr, offset);
-
+        
+        const startTime = performance.now();
 		// run the wasm function and calculate length
 		const pointer = parseJson(offset, uint8arr.length);
+        const timeTaken = performance.now() - startTime
+        console.log("Time taken:", timeTaken, "ms")
+        
 		const len = ptrLen(pointer);
 
 		// read the string from the wasm memory
 		let str = new TextDecoder().decode(new Uint8Array(memory.buffer, pointer, len));
-        const timeTaken = performance.now() - startTime
-        console.log("Time taken:", timeTaken, "ms")
         document.getElementById('timeTaken').innerText = `(${(timeTaken).toFixed(2)}ms)`;
         document.getElementById('result').innerText = str;
         
